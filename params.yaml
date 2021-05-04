@@ -14,8 +14,9 @@ preprocess:
 train:
   seed: 20210428
   validation_split: 0.2
-  epochs: 10
+  epochs: 1
   batch_size: 128
+  resume: true
 
 model:
   name: mlp
@@ -29,3 +30,13 @@ model:
     conv_kernel_size: 3
     conv_units: 32
     dropout: 0.5
+  metrics:
+    categorical_accuracy: true
+    recall: true
+    precision: true
+    auc-roc: true
+    auc-prc: true
+    fp: false
+    fn: false
+    tp: false
+    tn: false

@@ -1,8 +1,11 @@
 import tensorflow as tf
 import numpy as np
+import os
 from util import load_params
 
 import models
+
+MODEL_FILE = "models/model.h5"
 
 def load_npz_data(filename):
     npzfile = np.load(filename)
@@ -20,7 +23,10 @@ def history_to_csv(history):
 
 def main():
     params = load_params()["train"]
-    m = models.get_model()
+    if params["resume"] and os.path.exists(MODEL_FILE):
+        m = tf.keras.models.load_model(MODEL_FILE)
+    else:
+        m = models.get_model()
     m.summary()
 
     whole_train_img, whole_train_labels = load_npz_data("data/preprocessed/mnist-train.npz")
@@ -51,7 +57,7 @@ def main():
     with open("logs.csv", "w") as f:
         f.write(history_to_csv(history))
 
-    m.save("models/model.h5")
+    m.save(MODEL_FILE)
 
 if __name__ == "__main__":
     main()
