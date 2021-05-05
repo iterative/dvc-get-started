@@ -7,6 +7,66 @@ import models
 
 MODEL_FILE = "models/model.h5"
 
+class DVCCheckpointsCallback(tf.keras.callbacks.Callback):
+
+    def __init__(self, frequency = 1):
+        self.frequency = frequency
+
+    def dvc_signal(self):
+        "Generates a DVC signal file and blocks until it's deleted"
+        dvc_root = os.getenv("DVC_ROOT") # Root dir of dvc project.
+        if dvc_root: # Skip if not running via dvc.
+            signal_file = os.path.join(dvc_root, ".dvc", "tmp",
+                "DVC_CHECKPOINT")
+            with open(signal_file, "w") as f: # Write empty file.
+                f.write("")
+            while os.path.exists(signal_file): # Wait until dvc deletes file.
+                # Wait 10 milliseconds
+                time.sleep(0.01)
+
+    def on_train_begin(self, logs=None):
+        pass
+
+    def on_train_end(self, logs=None):
+        pass
+
+    def on_epoch_begin(self, epoch, logs=None):
+        pass
+
+    def on_epoch_end(self, epoch, logs=None):
+        if (epoch % self.frequency) == 0:
+            dvc_signal(self)
+
+    def on_test_begin(self, logs=None):
+        pass
+
+    def on_test_end(self, logs=None):
+        pass
+
+    def on_predict_begin(self, logs=None):
+        pass
+
+    def on_predict_end(self, logs=None):
+        pass
+
+    def on_train_batch_begin(self, batch, logs=None):
+        pass
+
+    def on_train_batch_end(self, batch, logs=None):
+        pass
+
+    def on_test_batch_begin(self, batch, logs=None):
+        pass
+
+    def on_test_batch_end(self, batch, logs=None):
+        pass
+
+    def on_predict_batch_begin(self, batch, logs=None):
+        pass
+
+    def on_predict_batch_end(self, batch, logs=None):
+        pass
+
 def load_npz_data(filename):
     npzfile = np.load(filename)
     return (npzfile['images'], npzfile['labels'])
@@ -48,11 +108,13 @@ def main():
     print(f"y_train: {y_train.shape}")
     print(f"y_valid: {y_valid.shape}")
 
-    history = m.fit(x_train, y_train,
-                  batch_size = params["batch_size"],
-                  epochs = params["epochs"],
-                  verbose=1,
-                  validation_data = (x_valid, y_valid))
+    history = m.fit(x_train,
+                    y_train,
+                    batch_size = params["batch_size"],
+                    epochs = params["epochs"],
+                    verbose=1,
+                    validation_data = (x_valid, y_valid),
+                    callbacks=[DVCCheckpointsCallback(frequency=1)])
 
     with open("logs.csv", "w") as f:
         f.write(history_to_csv(history))
