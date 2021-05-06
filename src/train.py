@@ -4,6 +4,7 @@ import os
 from util import load_params
 
 import models
+from dvc.api import make_checkpoint
 
 MODEL_FILE = "models/model.h5"
 
@@ -11,18 +12,6 @@ class DVCCheckpointsCallback(tf.keras.callbacks.Callback):
 
     def __init__(self, frequency = 1):
         self.frequency = frequency
-
-    def dvc_signal(self):
-        "Generates a DVC signal file and blocks until it's deleted"
-        dvc_root = os.getenv("DVC_ROOT") # Root dir of dvc project.
-        if dvc_root: # Skip if not running via dvc.
-            signal_file = os.path.join(dvc_root, ".dvc", "tmp",
-                "DVC_CHECKPOINT")
-            with open(signal_file, "w") as f: # Write empty file.
-                f.write("")
-            while os.path.exists(signal_file): # Wait until dvc deletes file.
-                # Wait 10 milliseconds
-                time.sleep(0.01)
 
     def on_train_begin(self, logs=None):
         pass
@@ -35,7 +24,7 @@ class DVCCheckpointsCallback(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         if (epoch % self.frequency) == 0:
-            dvc_signal(self)
+            make_checkpoint()
 
     def on_test_begin(self, logs=None):
         pass
