@@ -1,17 +1,14 @@
 import tensorflow as tf
 import numpy as np
 import os
-from util import load_params
 
+from util import load_params
 import models
 from dvc.api import make_checkpoint
 
 MODEL_FILE = "models/model.h5"
 
-class DVCCheckpointsCallback(tf.keras.callbacks.Callback):
-
-    def __init__(self, frequency = 1):
-        self.frequency = frequency
+class DVCLiveCallback(tf.keras.callbacks.Callback):
 
     def on_train_begin(self, logs=None):
         pass
@@ -23,8 +20,10 @@ class DVCCheckpointsCallback(tf.keras.callbacks.Callback):
         pass
 
     def on_epoch_end(self, epoch, logs=None):
-        if (epoch % self.frequency) == 0:
-            make_checkpoint()
+        logs = logs or {}
+        for metric, value in logs.items():
+            dvclive.log(metric, value)
+        dvclive.next_step()
 
     def on_test_begin(self, logs=None):
         pass
@@ -97,13 +96,15 @@ def main():
     print(f"y_train: {y_train.shape}")
     print(f"y_valid: {y_valid.shape}")
 
-    history = m.fit(x_train,
+    dvclive.init("training_metrics")
+
+    m.fit(x_train,
                     y_train,
                     batch_size = params["batch_size"],
                     epochs = params["epochs"],
                     verbose=1,
                     validation_data = (x_valid, y_valid),
-                    callbacks=[DVCCheckpointsCallback(frequency=1)])
+                    callbacks=[DVCLiveCallback()])
 
     with open("logs.csv", "w") as f:
         f.write(history_to_csv(history))
