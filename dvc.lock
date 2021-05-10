@@ -43,3 +43,37 @@ stages:
       md5: 6b4943a36fba46ed1183f2c1970e7f5f.dir
       size: 441841020
       nfiles: 2
+  train:
+    cmd: python3 src/train.py
+    deps:
+    - path: data/preprocessed/
+      md5: 6b4943a36fba46ed1183f2c1970e7f5f.dir
+      size: 441841020
+      nfiles: 2
+    - path: src/models.py
+      md5: edfd5004a83c4566f5e237f84df856c2
+      size: 3179
+    - path: src/train.py
+      md5: 5e6afbe82da657d92455afd7a4e79aee
+      size: 1863
+    params:
+      params.yaml:
+        model.cnn.conv_kernel_size: 3
+        model.cnn.conv_units: 32
+        model.cnn.dense_units: 128
+        model.cnn.dropout: 0.5
+        model.mlp.activation: relu
+        model.mlp.units: 16
+        model.name: mlp
+        model.optimizer: Adam
+        train.batch_size: 128
+        train.epochs: 10
+        train.seed: 20210428
+        train.validation_split: 0.2
+    outs:
+    - path: logs.csv
+      md5: b4934a84dd5c750f1e8f0934a40cec42
+      size: 3393
+    - path: models/model.h5
+      md5: ef8358269d38866de5f3f4330e7ba256
+      size: 189856
