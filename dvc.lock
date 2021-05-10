@@ -77,3 +77,16 @@ stages:
     - path: models/model.h5
       md5: ef8358269d38866de5f3f4330e7ba256
       size: 189856
+  evaluate:
+    cmd: python3 src/evaluate.py
+    deps:
+    - path: models/model.h5
+      md5: ef8358269d38866de5f3f4330e7ba256
+      size: 189856
+    - path: src/evaluate.py
+      md5: d2587009d3b5913d0b3bb3aa6cbc5037
+      size: 647
+    outs:
+    - path: metrics.json
+      md5: 1e1a3f545fa1ef275ca795bebea0e789
+      size: 293
